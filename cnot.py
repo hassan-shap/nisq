@@ -78,19 +78,19 @@ for i_n, η in enumerate(η_list):
             rand_vec = np.random.multivariate_normal(np.zeros(len(Σ)),Σ,Nrep)
             rand_comp = np.abs(rand_vec) > (pi**0.5/2)
             vx_c = np.sum(rand_comp[:,[1,2,4,5]],axis=1)%2
-            vz_c = np.sum(rand_comp[:,[1,2,7,9,11,13]],axis=1)%2
-            vx_t = np.sum(rand_comp[:,[1,2,4,5]],axis=1)%2
-            vz_t = np.sum(rand_comp[:,[1,2,7,9,11,13]],axis=1)%2
-            XX[i_s] = np.sum(vx*(1-vz))/Nrep
-            YX[i_s] = np.sum(vz*(1-vx))/Nrep
-            ZX[i_s] = np.sum(vx*vz)/Nrep
+            vx_t = np.sum(rand_comp[:,[1,2,6,8,10,12]],axis=1)%2
+            vz_c = np.sum(rand_comp[:,[0,2,3,4,6,7,9]],axis=1)%2
+            vz_t = np.sum(rand_comp[:,[7,9,11]],axis=1)%2
+            XX[i_s] = np.sum(vx_c*(1-vz_c)*vx_t*(1-vz_t))/Nrep
+            ZX[i_s] = np.sum(vz_c*(1-vx_c)*vx_t*(1-vz_t))/Nrep
+            YX[i_s] = np.sum(vx_c*vz_c*vx_t*(1-vz_t))/Nrep
             # print(i_s)
             
         toc = time.time()
         print("Finished Loss= %.2f, r=%d in %.1f secs" % (η,i_rep,toc-tic))
         # fname = "data_hadamard/" + "sc_eq_sgkp_p_%.2f_i_%d.npz" % (η,i_rep)
         fname = "data_cnot/" + "sc_0_p_%.2f_i_%d.npz" % (η,i_rep)
-        # np.savez(fname, σ2_list=σ2_list, probX_mc=probX_mc, probY_mc=probY_mc, probZ_mc=probZ_mc, Nrep=Nrep)
+        np.savez(fname, σ2_list=σ2_list, XX=XX, YX=YX, ZX=ZX, Nrep=Nrep)
 
         return 0
     
