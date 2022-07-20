@@ -6,7 +6,7 @@ import time
 repeat = 24
 Nrep = 100000 # number of iterations
 
-η_list = np.array([0.75,0.85,0.95,1.0])
+η_list = [0.9]#np.array([0.75,0.85,0.95,1.0])
 σ2_list = np.logspace(-3,-0.5,20)/2
 
 from joblib import Parallel, delayed

@@ -71,7 +71,7 @@ for i_n, η in enumerate(η_list):
         
         tic = time.time()
         for i_s, σgkp2 in enumerate(σ2_list):
-            σc2 = σgkp2
+            σc2 = 0*σgkp2
             Σ = covariance_matrix(σgkp2,σc2,σm2)
             rand_vec = np.random.multivariate_normal(np.zeros(4),Σ,Nrep)
             rand_comp = np.abs(rand_vec) > (pi**0.5/2)
@@ -84,7 +84,8 @@ for i_n, η in enumerate(η_list):
             
         toc = time.time()
         print("Finished Loss= %.2f, r=%d in %.1f secs" % (η,i_rep,toc-tic))
-        fname = "data_hadamard/" + "sc_eq_sgkp_p_%.2f_i_%d.npz" % (η,i_rep)
+        # fname = "data_hadamard/" + "sc_eq_sgkp_p_%.2f_i_%d.npz" % (η,i_rep)
+        fname = "data_hadamard/" + "sc_0_p_%.2f_i_%d.npz" % (η,i_rep)
         np.savez(fname, σ2_list=σ2_list, probX_mc=probX_mc, probY_mc=probY_mc, probZ_mc=probZ_mc, Nrep=Nrep)
 
         return 0
