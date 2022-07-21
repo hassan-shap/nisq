@@ -70,10 +70,11 @@ for i_n, η in enumerate(η_list):
         XX = np.zeros(len(σ2_list))
         YX = np.zeros(len(σ2_list))
         ZX = np.zeros(len(σ2_list))
+        err_mc = np.zeros((16,len(σ2_list)))
         
         tic = time.time()
         for i_s, σgkp2 in enumerate(σ2_list):
-            σc2 = 0*σgkp2
+            σc2 = σgkp2
             Σ = covariance_matrix_cnot(σgkp2,σc2,σm2)
             rand_vec = np.random.multivariate_normal(np.zeros(len(Σ)),Σ,Nrep)
             rand_comp = np.abs(rand_vec) > (pi**0.5/2)
@@ -81,17 +82,22 @@ for i_n, η in enumerate(η_list):
             vx_t = np.sum(rand_comp[:,[1,2,6,8,10,12]],axis=1)%2
             vz_c = np.sum(rand_comp[:,[0,2,3,4,6,7,9]],axis=1)%2
             vz_t = np.sum(rand_comp[:,[7,9,11]],axis=1)%2
-            XX[i_s] = np.sum(vx_c*(1-vz_c)*vx_t*(1-vz_t))/Nrep
-            ZX[i_s] = np.sum(vz_c*(1-vx_c)*vx_t*(1-vz_t))/Nrep
-            YX[i_s] = np.sum(vx_c*vz_c*vx_t*(1-vz_t))/Nrep
-            # print(i_s)
-            
+            # XX[i_s] = np.sum(vx_c*(1-vz_c)*vx_t*(1-vz_t))/Nrep
+            # ZX[i_s] = np.sum(vz_c*(1-vx_c)*vx_t*(1-vz_t))/Nrep
+            # YX[i_s] = np.sum(vx_c*vz_c*vx_t*(1-vz_t))/Nrep
+            for sz_c in range(2):
+                for sx_c in range(2):
+                    for sz_t in range(2):
+                        for sx_t in range(2):
+                            i_e = np.array([sz_c,sx_c,sz_t,sx_t])@ (2**np.arange(4))
+                            err_mc[i_e,i_s] = np.sum(np.abs((1-sz_c-vz_c)*(1-sx_c-vx_c)*(1-sz_t-vz_t)*(1-sx_t-vx_t)))/Nrep           
         toc = time.time()
         print("Finished Loss= %.2f, r=%d in %.1f secs" % (η,i_rep,toc-tic))
-        # fname = "data_hadamard/" + "sc_eq_sgkp_p_%.2f_i_%d.npz" % (η,i_rep)
-        fname = "data_cnot/" + "sc_0_p_%.2f_i_%d.npz" % (η,i_rep)
-        np.savez(fname, σ2_list=σ2_list, XX=XX, YX=YX, ZX=ZX, Nrep=Nrep)
-
+        fname = "data_cnot/" + "sc_eq_sgkp_p_%.2f_i_%d.npz" % (η,i_rep)
+        # fname = "data_cnot/" + "sc_0_p_%.2f_i_%d.npz" % (η,i_rep)
+        # np.savez(fname, σ2_list=σ2_list, XX=XX, YX=YX, ZX=ZX, Nrep=Nrep)
+        np.savez(fname, σ2_list=σ2_list, err_mc=err_mc, Nrep=Nrep)
+        
         return 0
     
     results = Parallel(n_jobs=num_cores)(delayed(runner)(i_rep) for i_rep in range(repeat))
