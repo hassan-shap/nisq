@@ -4,9 +4,8 @@ import itertools
 import time
 
 repeat = 100
-Nrep = 10000 # number of iterations
-pc_list = np.linspace(0,0.001,10)
-pm = 0 # measuerment error rate
+Nrep = 1000 # number of iterations
+pc_list = np.linspace(0.01,0.5,50)
 
 from joblib import Parallel, delayed
 import multiprocessing
@@ -104,7 +103,7 @@ def runner(i_rep):
     toc = time.time()
     print("Finished r=%d in %.1f secs" % (i_rep,toc-tic))
     # fname = "data_dv_cnot/" + "pm_%.2f_i_%d.npz" % (pm,i_rep)
-    fname = "data_dv_cnot/" + "fine_pm_eq_pc_i_%d_mc.npz" % (i_rep)
+    fname = "data_dv_cnot/" + "pm_eq_pc_i_%d_mc.npz" % (i_rep)
     np.savez(fname, pc_list=pc_list, err_mc=err_mc, Nrep=Nrep)
 
     return 0
