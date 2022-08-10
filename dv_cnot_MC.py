@@ -5,7 +5,7 @@ import time
 
 repeat = 100
 Nrep = 1000 # number of iterations
-pc_list = np.linspace(0.01,0.5,50)
+pc_list = np.linspace(0,0.25,50)
 
 from joblib import Parallel, delayed
 import multiprocessing
@@ -69,7 +69,8 @@ def runner(i_rep):
     tic = time.time()
     
     for i_p, p_c in enumerate(pc_list):
-        p_m = p_c
+        p_m = 0*p_c
+        # p_c = 0
         weights_cz = np.concatenate(([1-14/15*p_c],np.ones(7)*2/15*p_c))
         weights_single_qubit = np.array([1-p_m,p_m/3,p_m/3,p_m/3]) # I, X, Z, Y
 
@@ -87,13 +88,15 @@ def runner(i_rep):
                     cz_err_gen(err_cz,7,11,vec_x,vec_z)
 
                 err_q = np.random.choice(4, 1, p=weights_single_qubit)
-                vec_x[i_l] += (err_q%2)
-                vec_z[i_l] += int(err_q/2)
+                # vec_x[i_l] += (err_q%2)
+                # vec_z[i_l] += int(err_q/2)
+                vec_x[i_l != 6] += (err_q%2)
+                vec_z[i_l != 6] += int(err_q/2)
 
-            sz_c = np.sum(vec_x[Xinds_z_c]) + np.sum(vec_z[Zinds_z_c])
-            sx_c = np.sum(vec_x[inds_x_c]) + np.sum(vec_z[inds_x_c])
-            sz_t = np.sum(vec_z[inds_z_t])
-            sx_t = np.sum(vec_x[Xinds_x_t]) + np.sum(vec_z[Zinds_x_t])
+            sz_c = np.sum(vec_x[Xinds_z_c]) + np.sum(vec_z[Zinds_z_c]) + vec_z[6]
+            sx_c = np.sum(vec_x[inds_x_c]) + np.sum(vec_z[inds_x_c]) + vec_x[6]
+            sz_t = np.sum(vec_z[inds_z_t]) + vec_z[14]
+            sx_t = np.sum(vec_x[Xinds_x_t]) + np.sum(vec_z[Zinds_x_t]) + vec_x[14]
 
             i_e = np.array([sz_c%2,sx_c%2,sz_t%2,sx_t%2])@ (2**np.arange(4))
             err_mc[i_e,i_p] += 1
@@ -102,8 +105,9 @@ def runner(i_rep):
 
     toc = time.time()
     print("Finished r=%d in %.1f secs" % (i_rep,toc-tic))
-    # fname = "data_dv_cnot/" + "pm_%.2f_i_%d.npz" % (pm,i_rep)
-    fname = "data_dv_cnot/" + "pm_eq_pc_i_%d_mc.npz" % (i_rep)
+    fname = "data_dv_cnot/" + "new_pm_0_i_%d_2.npz" % (i_rep)
+    # fname = "data_dv_cnot/" + "new_pc_0_i_%d_2.npz" % (i_rep)
+    # fname = "data_dv_cnot/" + "new_pm_eq_pc_i_%d_2.npz" % (i_rep)
     np.savez(fname, pc_list=pc_list, err_mc=err_mc, Nrep=Nrep)
 
     return 0
